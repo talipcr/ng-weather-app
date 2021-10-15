@@ -1,0 +1,61 @@
+<div class="container-fluid">
+  <div class="well">
+    <h2>Enter a FR zipcode:</h2>
+    <input
+      [formControl]="zipcodeForm"
+      (keydown.enter)="onSubmit()"
+      class="form-control"
+      placeholder="Example : 75000"
+      type="number"
+      id="addLocation"
+      [class.valid]="
+        zipcodeForm.valid && (zipcodeForm.dirty || zipcodeForm.touched)
+      "
+      [class.invalid]="
+        zipcodeForm.invalid && (zipcodeForm.dirty || zipcodeForm.touched)
+      "
+    />
+    <br />
+    <button (click)="onSubmit()" class="btn btn-primary" id="addLocationBtn">
+      Add location
+    </button>
+  </div>
+  <ng-template [ngIf]="this.weatherList.length > 0" [ngIfElse]="elseTemplate">
+    <div *ngFor="let item of weatherList">
+      <div class="well flex">
+        <div>
+          <h3>{{ item.city }}&nbsp;({{ item.zipCode }})</h3>
+          <h4>Current conditions: {{ item.condition }}</h4>
+          <h4>Temperatures today:</h4>
+          <p>
+            Current&nbsp;{{
+              item.temperature | number: "1.0-0"
+            }}&deg;&nbsp;-&nbsp;Max&nbsp;{{
+              item.maxTemp | number: "1.0-0"
+            }}&deg;&nbsp;-&nbsp;Min&nbsp;{{
+              item.minTemp | number: "1.0-0"
+            }}&deg;
+          </p>
+          <p>
+            <a [routerLink]="['forecast', item.zipCode]"
+              >Show 5-day forecast for {{ item.city }}</a
+            >
+          </p>
+        </div>
+        <div>
+          <span class="close" (click)="deleteWeather(item)">×</span>
+          <img
+            src="https://www.angulartraining.com/images/weather/{{
+              item.icon
+            }}.png"
+          />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #elseTemplate>
+    <div>
+      <h3>No locations added yet</h3>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,38 @@
+<div class="container-fluid">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">5-day forecast for {{ city }}</h3>
+    </div>
+
+    <ul class="list-group" *ngIf="listForecast.length > 0; else elseNoForecast">
+      <li class="list-group-item" *ngFor="let item of listForecast">
+        {{ returnDate(item.timestamp) | date: "EEEE, MMM d" }}:&nbsp;{{
+          item.condition
+        }}&nbsp;-&nbsp;Min:&nbsp;{{
+          item.minTemp | number: "1.0-0"
+        }}&deg;&nbsp;-&nbsp;Max:&nbsp;{{ item.maxTemp | number: "1.0-0" }}&deg;
+
+        <img
+          class="icon"
+          src="https://www.angulartraining.com/images/weather/{{
+            item.icon
+          }}.png"
+        />
+      </li>
+    </ul>
+
+    <ng-template #elseNoForecast>
+      <div class="panel-body">
+        <p>No forecast available</p>
+      </div>
+    </ng-template>
+  </div>
+  <button
+    [routerLink]="['/']"
+    class="btn btn-success"
+    tabindex="0"
+    id="mainPageBtn"
+  >
+    &lt;&nbsp;Back to main page
+  </button>
+</div>
