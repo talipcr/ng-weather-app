@@ -1,6 +1,8 @@
 {
   "name": "ng-weather-app",
-  "version": "0.0.0",
+  "version": "2.0.0",
+  "author": "Talip Cesur <talip.cesur@gmail.com>",
+  "description": "NgWeatherApp application for the certification of the Angular Training",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

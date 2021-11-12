@@ -1,27 +1,12 @@
 # NgWeatherApp
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.9.
+Repo containing the source code of the NgWeatherApp application for the certification of the [Angular Training](https://www.angulartraining.com/angular-certification.html) built using Angular 13.
 
-## Development server
+## Certifications
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+- :white_check_mark: Angular Level 2 - ID 2J20CGK
+- :white_square: Angular Level 3
 
-## Code scaffolding
+## Contact
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Talip Cesur - [Twitter](https://twitter.com/talip_cr) - [Linkedin](https://www.linkedin.com/in/talip-cesur/) - [Website](https://talipcesur.fr/) - [Email](mailto:talip.cesur@gmail.com)
