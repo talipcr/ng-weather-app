@@ -4,8 +4,8 @@ Repo containing the source code of the NgWeatherApp application for the certific
 
 ## Certifications
 
-- :white_check_mark: Angular Level 2 - ID 2J20CGK
-- :white_square: Angular Level 3
+- [x] Angular Level 2 - ID 2J20CGK
+- [] Angular Level 3
 
 ## Contact
 
