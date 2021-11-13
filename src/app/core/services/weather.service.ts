@@ -20,14 +20,9 @@ export class WeatherService {
     private toastr: ToastrService
   ) {}
 
-  getAllWeather(): Observable<any> {
-    const zipCodeLocalStorage = localStorage.getItem('zipCode');
-    const zipCodeTab: string[] = zipCodeLocalStorage
-      ? JSON.parse(zipCodeLocalStorage)
-      : [];
-
-    if (zipCodeTab.length > 0) {
-      const zipCodes = zipCodeTab.map((zipCode) => {
+  public getAllWeather(zipCodeList: string[]): Observable<any> {
+    if (zipCodeList.length > 0) {
+      const zipCodes = zipCodeList.map((zipCode) => {
         return this.getWeatherByZipCode(zipCode);
       });
 
@@ -40,7 +35,7 @@ export class WeatherService {
     }
   }
 
-  getWeatherByZipCode(zipCode: string): Observable<any> {
+  public getWeatherByZipCode(zipCode: string): Observable<any> {
     return this.httpClient
       .get(
         `${this.apiUrl}weather?zip=${zipCode
@@ -75,46 +70,7 @@ export class WeatherService {
       );
   }
 
-  setZipCode(zipCode: string): void {
-    const zipCodeStringify = JSON.stringify(zipCode);
-    const zipCodeLocalStorage = localStorage.getItem('zipCode');
-
-    if (!zipCodeLocalStorage?.includes(zipCodeStringify)) {
-      let zipCodeTab: string[] = zipCodeLocalStorage
-        ? JSON.parse(zipCodeLocalStorage)
-        : [];
-      zipCodeTab = [zipCodeStringify, ...zipCodeTab];
-      localStorage.setItem('zipCode', JSON.stringify(zipCodeTab));
-    }
-  }
-
-  deleteZipCode(zipCode: string): void {
-    const zipCodeStringify = JSON.stringify(zipCode);
-    const zipCodeLocalStorage = localStorage.getItem('zipCode');
-
-    if (zipCodeLocalStorage?.includes(zipCodeStringify)) {
-      const zipCodeTab: string[] = JSON.parse(zipCodeLocalStorage);
-      const index = zipCodeTab.indexOf(zipCodeStringify);
-      zipCodeTab.splice(index, 1);
-      localStorage.setItem('zipCode', JSON.stringify(zipCodeTab));
-    }
-  }
-
-  isZipCodeExist(zipCode: string): boolean {
-    const zipCodeStringify = JSON.stringify(zipCode);
-    const zipCodeLocalStorage = localStorage.getItem('zipCode');
-    const zipCodeTab: string[] = zipCodeLocalStorage
-      ? JSON.parse(zipCodeLocalStorage)
-      : [];
-
-    if (zipCodeTab.includes(zipCodeStringify)) {
-      this.toastr.info('Zip Code already exist', 'Info');
-      return true;
-    }
-    return false;
-  }
-
-  getForecast(zipCode: string): Observable<any> {
+  public getForecast(zipCode: string): Observable<any> {
     return this.httpClient
       .get(
         `${this.apiUrl}forecast/daily?zip=${zipCode},fr&cnt=5&appid=${this.apiKey}&units=metric`
