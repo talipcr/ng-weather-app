@@ -19,6 +19,9 @@
     <button (click)="onSubmit()" class="btn btn-primary" id="addLocationBtn">
       Add location
     </button>
+    <p style="width: 100%; text-align: end">
+      <i [weatherAppCountdownTimer]="autoRefreshBool$">Updating weather...</i>
+    </p>
   </div>
   <ng-template [ngIf]="this.weatherList.length > 0" [ngIfElse]="elseTemplate">
     <div *ngFor="let item of weatherList">

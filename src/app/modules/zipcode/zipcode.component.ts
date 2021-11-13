@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Observable } from 'rxjs';
+import { interval, Observable, Subject } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { Forecast } from 'src/app/core/models/forecast';
+import { LocalStorageService } from 'src/app/core/services/local-storage.service';
 import { WeatherService } from 'src/app/core/services/weather.service';
 
 @Component({
@@ -14,33 +16,59 @@ export class ZipcodeComponent implements OnInit {
   weatherList$: Observable<any> = {} as Observable<any>;
   weatherList: Forecast[] = [];
   zipcodeForm: FormControl = new FormControl('');
+  autoRefreshInterval = interval(31000);
+  autoRefreshBool$ = new Subject();
 
   constructor(
     private fb: FormBuilder,
     private weatherService: WeatherService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private localStorage: LocalStorageService
   ) {}
 
   ngOnInit(): void {
-    this.weatherList$ = this.weatherService.getAllWeather();
-    this.weatherList$.subscribe((data) => {
-      this.weatherList = data;
-    });
-
+    // init Form
     this.zipcodeForm = this.fb.control(
       { value: '', disabled: false },
       Validators.required
     );
+
+    // init on first load
+    this.initWeather();
+
+    // auto refresh every 30 seconds
+    this.autoRefreshInterval.subscribe(async () => {
+      await this.initWeather();
+      this.autoRefreshBool$.next(0);
+    });
   }
 
-  deleteWeather(weather: Forecast): void {
-    if (weather.zipCode) {
-      // remove from local storage
-      this.weatherService.deleteZipCode(weather.zipCode);
+  async initWeather(): Promise<void> {
+    // Get weather list from local storage
+    const zipCodeList = await this.localStorage.getLocation('zipCode');
 
-      // remove from current list
-      this.weatherList = this.weatherList.filter(
-        (w) => w.zipCode !== weather.zipCode
+    // Get weather list from API
+    if (zipCodeList?.length > 0) {
+      this.weatherService.getAllWeather(zipCodeList).subscribe((data) => {
+        this.weatherList = data;
+      });
+    }
+  }
+
+  async deleteWeather(weather: Forecast): Promise<void> {
+    // Get weather list from local storage
+    const zipCodeList = await this.localStorage.getLocation('zipCode');
+
+    if (weather.zipCode && zipCodeList?.length > 0) {
+      // remove from local storage
+      this.localStorage.setLocation(
+        'zipCode',
+        zipCodeList.filter((zipCode: string) => zipCode !== weather.zipCode)
+      );
+
+      // filter weather list
+      this.weatherList = await this.weatherList.filter(
+        (item) => item.zipCode !== weather.zipCode
       );
 
       // toastr success
@@ -51,20 +79,34 @@ export class ZipcodeComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
-    if (
-      this.zipcodeForm.value &&
-      !this.weatherService.isZipCodeExist(this.zipcodeForm.value)
-    ) {
+  async onSubmit(): Promise<void> {
+    // Get weather list from local storage
+    const zipCodeList = (await this.localStorage.getLocation('zipCode')) ?? [];
+
+    // Verify if zipcode is already in the list
+    const isAlreadyInList = zipCodeList.includes(
+      this.zipcodeForm.value.toString()
+    );
+
+    if (this.zipcodeForm.value && !isAlreadyInList) {
       this.weatherService
         .getWeatherByZipCode(this.zipcodeForm.value)
+        .pipe(
+          finalize(async () => {
+            this.zipcodeForm.clearValidators();
+            await this.zipcodeForm.reset();
+          })
+        )
         .subscribe((data: Forecast) => {
           if (data) {
             // add to current list
             this.weatherList = [data, ...this.weatherList];
 
             // add to local storage
-            this.weatherService.setZipCode(data.zipCode);
+            this.localStorage.setLocation('zipCode', [
+              data.zipCode.toString(),
+              ...zipCodeList,
+            ]);
 
             // toastr success
             this.toastr.success(
@@ -73,9 +115,11 @@ export class ZipcodeComponent implements OnInit {
             );
           }
         });
-      this.zipcodeForm.reset();
     } else {
       this.zipcodeForm.markAsTouched();
+
+      // toastr info
+      this.toastr.info('Zipcode already in the list', 'Info');
     }
   }
 }
