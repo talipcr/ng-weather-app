@@ -17,7 +17,7 @@ export class ZipcodeComponent implements OnInit {
   weatherList: Forecast[] = [];
   zipcodeForm: FormControl = new FormControl('');
   autoRefreshInterval = interval(31000);
-  autoRefreshBool$ = new Subject();
+  autoRefresh$ = new Subject();
 
   constructor(
     private fb: FormBuilder,
@@ -39,7 +39,7 @@ export class ZipcodeComponent implements OnInit {
     // auto refresh every 30 seconds
     this.autoRefreshInterval.subscribe(async () => {
       await this.initWeather();
-      this.autoRefreshBool$.next(0);
+      this.autoRefresh$.next(0);
     });
   }
 
