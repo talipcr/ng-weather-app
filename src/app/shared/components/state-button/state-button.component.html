@@ -3,7 +3,6 @@
     <ng-template [ngTemplateOutlet]="defaultTemplate"></ng-template>
   </ng-container>
   <ng-container *ngSwitchCase="ButtonStateModel.WORKING">
-    <weather-app-loader-spinner></weather-app-loader-spinner>
     <button class="btn btn-info" disabled>Adding...</button>
   </ng-container>
   <ng-container *ngSwitchCase="ButtonStateModel.DONE">
