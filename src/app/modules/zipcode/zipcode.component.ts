@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { interval, Observable, Subject } from 'rxjs';
+import { interval, Observable, Subject, timer } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Forecast } from 'src/app/core/models/forecast';
 import { LocalStorageService } from 'src/app/core/services/local-storage.service';
 import { WeatherService } from 'src/app/core/services/weather.service';
+import { StateButtonService } from 'src/app/shared/components/state-button/state-button.service';
 
 @Component({
   selector: 'weather-app-zipcode',
@@ -23,7 +24,8 @@ export class ZipcodeComponent implements OnInit {
     private fb: FormBuilder,
     private weatherService: WeatherService,
     private toastr: ToastrService,
-    private localStorage: LocalStorageService
+    private localStorage: LocalStorageService,
+    private StateButtonService: StateButtonService
   ) {}
 
   ngOnInit(): void {
@@ -38,8 +40,8 @@ export class ZipcodeComponent implements OnInit {
 
     // auto refresh every 30 seconds
     this.autoRefreshInterval.subscribe(async () => {
-      await this.initWeather();
       this.autoRefresh$.next(0);
+      timer(1000).subscribe(async () => await this.initWeather());
     });
   }
 
@@ -80,6 +82,7 @@ export class ZipcodeComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
+    this.StateButtonService.setButtonStateWorking();
     // Get weather list from local storage
     const zipCodeList = (await this.localStorage.getLocation('zipCode')) ?? [];
 
@@ -99,25 +102,30 @@ export class ZipcodeComponent implements OnInit {
         )
         .subscribe((data: Forecast) => {
           if (data) {
-            // add to current list
-            this.weatherList = [data, ...this.weatherList];
+            timer(500).subscribe(() => {
+              // add to current list
+              this.weatherList = [data, ...this.weatherList];
 
-            // add to local storage
-            this.localStorage.setLocation('zipCode', [
-              data.zipCode.toString(),
-              ...zipCodeList,
-            ]);
+              // add to local storage
+              this.localStorage.setLocation('zipCode', [
+                data.zipCode.toString(),
+                ...zipCodeList,
+              ]);
 
-            // toastr success
-            this.toastr.success(
-              'The weather data has been successfully recovered',
-              'Success'
-            );
+              // set button state to done
+              this.StateButtonService.setButtonStateDone();
+
+              // toastr success
+              this.toastr.success(
+                'The weather data has been successfully recovered',
+                'Success'
+              );
+            });
           }
         });
     } else {
       this.zipcodeForm.markAsTouched();
-
+      this.StateButtonService.setButtonStateDefault();
       // toastr info
       this.toastr.info('Zipcode already in the list', 'Info');
     }

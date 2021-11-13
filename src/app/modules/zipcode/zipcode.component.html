@@ -1,6 +1,7 @@
 <div class="container-fluid">
   <div class="well">
     <h2>Enter a FR zipcode:</h2>
+
     <input
       [formControl]="zipcodeForm"
       (keydown.enter)="onSubmit()"
@@ -16,22 +17,33 @@
       "
     />
     <br />
-    <button (click)="onSubmit()" class="btn btn-primary" id="addLocationBtn">
-      Add location
-    </button>
+    <weather-app-state-button
+      [defaultTemplate]="defaultTemplate"
+    ></weather-app-state-button>
+
+    <ng-template #defaultTemplate>
+      <button (click)="onSubmit()" class="btn btn-primary" id="addLocationBtn">
+        Add location
+      </button>
+    </ng-template>
+
     <p style="width: 100%; text-align: end">
       <i [weatherAppCountdownTimer]="autoRefresh$">Updating weather...</i>
     </p>
   </div>
 
-  <ng-template [ngIf]="this.weatherList.length > 0" [ngIfElse]="elseTemplate">
+  <ng-template
+    [ngIf]="this.weatherList.length > 0"
+    [ngIfElse]="elseNoLocationsTemplate"
+  >
     <div *ngFor="let item of weatherList">
       <div class="well flex">
-        <div *ngIf="(autoRefresh$ | async) === 0; else elseTemplate">
-          Updating weather for {{ item.city }}&nbsp;({{ item.zipCode }})
-        </div>
+        <weather-app-loader-spinner
+          *ngIf="(autoRefresh$ | async) === 0; else elseDisplayWeather"
+          [text]="'Loading weather...'"
+        ></weather-app-loader-spinner>
 
-        <ng-template #elseTemplate>
+        <ng-template #elseDisplayWeather>
           <div>
             <h3>{{ item.city }}&nbsp;({{ item.zipCode }})</h3>
             <h4>Current conditions: {{ item.condition }}</h4>
@@ -63,7 +75,7 @@
       </div>
     </div>
   </ng-template>
-  <ng-template #elseTemplate>
+  <ng-template #elseNoLocationsTemplate>
     <div>
       <h3>No locations added yet</h3>
     </div>
