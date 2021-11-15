@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { Forecast } from '../models/forecast';
+import { Forecast, ForecastFromLocalStorage } from '../models/forecast';
 
 @Injectable({
   providedIn: 'root',
@@ -20,10 +20,15 @@ export class WeatherService {
     private toastr: ToastrService
   ) {}
 
-  public getAllWeather(zipCodeList: string[]): Observable<any> {
+  public getAllWeather(
+    zipCodeList: ForecastFromLocalStorage[]
+  ): Observable<any> {
     if (zipCodeList.length > 0) {
-      const zipCodes = zipCodeList.map((zipCode) => {
-        return this.getWeatherByZipCode(zipCode);
+      const zipCodes = zipCodeList.map((zipCodeData) => {
+        return this.getWeatherByZipCode(
+          zipCodeData.zipCode,
+          zipCodeData.country
+        );
       });
 
       return forkJoin(zipCodes).pipe(
@@ -35,12 +40,13 @@ export class WeatherService {
     }
   }
 
-  public getWeatherByZipCode(zipCode: string): Observable<any> {
+  public getWeatherByZipCode(
+    zipCode: string,
+    countryCode: string = 'fr'
+  ): Observable<any> {
     return this.httpClient
       .get(
-        `${this.apiUrl}weather?zip=${zipCode
-          .toString()
-          .toLowerCase()},fr&appid=${this.apiKey}&units=metric`
+        `${this.apiUrl}weather?zip=${zipCode},${countryCode}&appid=${this.apiKey}&units=metric`
       )
       .pipe(
         map((response: any) => {
@@ -50,6 +56,7 @@ export class WeatherService {
 
           return {
             zipCode,
+            country: response.sys.country,
             city: response.name,
             condition: response.weather[0]?.main,
             temperature: response.main.temp,
@@ -70,10 +77,13 @@ export class WeatherService {
       );
   }
 
-  public getForecast(zipCode: string): Observable<any> {
+  public getForecast(
+    zipCode: string,
+    countryCode: string = 'fr'
+  ): Observable<any> {
     return this.httpClient
       .get(
-        `${this.apiUrl}forecast/daily?zip=${zipCode},fr&cnt=5&appid=${this.apiKey}&units=metric`
+        `${this.apiUrl}forecast/daily?zip=${zipCode},${countryCode}&cnt=5&appid=${this.apiKey}&units=metric`
       )
       .pipe(
         map((response: any) => {
@@ -85,6 +95,7 @@ export class WeatherService {
 
             return {
               zipCode,
+              country: response.sys.country,
               city: response.city.name,
               condition: forecast.weather[0].main,
               temperature: forecast.temp.day,

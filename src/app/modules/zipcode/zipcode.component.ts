@@ -1,9 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { interval, Observable, Subject, timer } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Forecast } from 'src/app/core/models/forecast';
+import {
+  Forecast,
+  ForecastFromLocalStorage,
+} from 'src/app/core/models/forecast';
 import { LocalStorageService } from 'src/app/core/services/local-storage.service';
 import { WeatherService } from 'src/app/core/services/weather.service';
 import { StateButtonService } from 'src/app/shared/components/state-button/state-button.service';
@@ -15,65 +23,67 @@ import { StateButtonService } from 'src/app/shared/components/state-button/state
 })
 export class ZipcodeComponent implements OnInit {
   weatherList$: Observable<any> = {} as Observable<any>;
-  weatherList: Forecast[] = [];
-  zipcodeForm: FormControl = new FormControl('');
-  autoRefreshInterval = interval(31000);
   autoRefresh$ = new Subject();
+
+  zipCodeForm: FormGroup = this.fb.group({
+    country: new FormControl('FR', [Validators.required]),
+    zipCode: new FormControl('', [Validators.required]),
+  });
+
+  weatherList: Forecast[] = [];
+  zipCodeList: ForecastFromLocalStorage[] = [];
+  autoRefreshInterval = interval(31000);
 
   constructor(
     private fb: FormBuilder,
     private weatherService: WeatherService,
     private toastr: ToastrService,
     private localStorage: LocalStorageService,
-    private StateButtonService: StateButtonService
+    private stateButtonService: StateButtonService
   ) {}
 
   ngOnInit(): void {
-    // init Form
-    this.zipcodeForm = this.fb.control(
-      { value: '', disabled: false },
-      Validators.required
-    );
-
-    // init on first load
+    // Init on first load
     this.initWeather();
 
-    // auto refresh every 30 seconds
+    // Auto refresh every 30 seconds
     this.autoRefreshInterval.subscribe(async () => {
       this.autoRefresh$.next(0);
       timer(1000).subscribe(async () => await this.initWeather());
     });
   }
 
+  async getZipCodeFromLocalStorage(): Promise<void> {
+    this.zipCodeList = this.localStorage.getLocalStorage('zipCode') ?? [];
+  }
+
   async initWeather(): Promise<void> {
     // Get weather list from local storage
-    const zipCodeList = await this.localStorage.getLocation('zipCode');
+    this.getZipCodeFromLocalStorage();
 
     // Get weather list from API
-    if (zipCodeList?.length > 0) {
-      this.weatherService.getAllWeather(zipCodeList).subscribe((data) => {
+    if (this.zipCodeList?.length > 0) {
+      this.weatherService.getAllWeather(this.zipCodeList).subscribe((data) => {
         this.weatherList = data;
       });
     }
   }
 
   async deleteWeather(weather: Forecast): Promise<void> {
-    // Get weather list from local storage
-    const zipCodeList = await this.localStorage.getLocation('zipCode');
-
-    if (weather.zipCode && zipCodeList?.length > 0) {
-      // remove from local storage
-      this.localStorage.setLocation(
-        'zipCode',
-        zipCodeList.filter((zipCode: string) => zipCode !== weather.zipCode)
+    if (weather.zipCode && this.zipCodeList?.length > 0) {
+      // Remove from local storage
+      this.zipCodeList = this.zipCodeList.filter(
+        (zipCodeData: ForecastFromLocalStorage) =>
+          zipCodeData.zipCode !== weather.zipCode
       );
+      this.localStorage.setLocalStorage('zipCode', this.zipCodeList);
 
-      // filter weather list
+      // Filter weather list
       this.weatherList = await this.weatherList.filter(
         (item) => item.zipCode !== weather.zipCode
       );
 
-      // toastr success
+      // Toastr success
       this.toastr.success(
         'The weather data has been successfully deleted',
         'Success'
@@ -82,22 +92,30 @@ export class ZipcodeComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    this.StateButtonService.setButtonStateWorking();
-    // Get weather list from local storage
-    const zipCodeList = (await this.localStorage.getLocation('zipCode')) ?? [];
+    // Set button state to working
+    this.stateButtonService.setButtonStateWorking();
 
     // Verify if zipcode is already in the list
-    const isAlreadyInList = zipCodeList.includes(
-      this.zipcodeForm.value.toString()
+    const isAlreadyInList = this.zipCodeList.includes(
+      this.zipCodeForm.value.toString()
     );
 
-    if (this.zipcodeForm.value && !isAlreadyInList) {
+    if (this.zipCodeForm.value && !isAlreadyInList) {
+      // Get crountry code
+      const country = this.zipCodeForm.controls['country'].value
+        .toString()
+        .toLowerCase();
+      // Get zip code
+      const zipCode = this.zipCodeForm.controls['zipCode'].value
+        .toString()
+        .toLowerCase();
+
+      // Get weather data from API
       this.weatherService
-        .getWeatherByZipCode(this.zipcodeForm.value)
+        .getWeatherByZipCode(zipCode, country)
         .pipe(
-          finalize(async () => {
-            this.zipcodeForm.clearValidators();
-            await this.zipcodeForm.reset();
+          finalize(() => {
+            this.zipCodeForm.reset();
           })
         )
         .subscribe((data: Forecast) => {
@@ -105,16 +123,11 @@ export class ZipcodeComponent implements OnInit {
             timer(500).subscribe(() => {
               // add to current list
               this.weatherList = [data, ...this.weatherList];
-
               // add to local storage
-              this.localStorage.setLocation('zipCode', [
-                data.zipCode.toString(),
-                ...zipCodeList,
-              ]);
-
-              // set button state to done
-              this.StateButtonService.setButtonStateDone();
-
+              this.zipCodeList = [{ zipCode, country }, ...this.zipCodeList];
+              this.localStorage.setLocalStorage('zipCode', this.zipCodeList);
+              // Set button state to done
+              this.stateButtonService.setButtonStateDone();
               // toastr success
               this.toastr.success(
                 'The weather data has been successfully recovered',
@@ -124,8 +137,8 @@ export class ZipcodeComponent implements OnInit {
           }
         });
     } else {
-      this.zipcodeForm.markAsTouched();
-      this.StateButtonService.setButtonStateDefault();
+      // Set button state to default
+      this.stateButtonService.setButtonStateDefault();
       // toastr info
       this.toastr.info('Zipcode already in the list', 'Info');
     }

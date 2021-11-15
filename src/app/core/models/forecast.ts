@@ -1,10 +1,16 @@
 export interface Forecast {
+  zipCode: string;
+  country: string;
+  city: string;
   condition: string;
   temperature: number;
-  maxTemp: number;
   minTemp: number;
-  city: string;
+  maxTemp: number;
   icon: string;
   timestamp: number;
+}
+
+export interface ForecastFromLocalStorage {
   zipCode: string;
+  country: string;
 }

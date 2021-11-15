@@ -1,20 +1,21 @@
 <div class="container-fluid">
-  <div class="well">
-    <h2>Enter a FR zipcode:</h2>
-
+  <div class="well" [formGroup]="zipCodeForm">
+    <h2>Enter a zip code:</h2>
     <input
-      [formControl]="zipcodeForm"
-      (keydown.enter)="onSubmit()"
+      formControlName="country"
+      (keydown.enter)="zipCode.focus()"
       class="form-control"
-      placeholder="Example : 75000"
+      type="text"
+      placeholder="Enter a country"
+    />
+    <br />
+    <input
+      #zipCode
+      formControlName="zipCode"
+      (keydown.enter)="zipCodeForm.valid && onSubmit()"
+      class="form-control"
+      placeholder="Enter a zip code"
       type="number"
-      id="addLocation"
-      [class.valid]="
-        zipcodeForm.valid && (zipcodeForm.dirty || zipcodeForm.touched)
-      "
-      [class.invalid]="
-        zipcodeForm.invalid && (zipcodeForm.dirty || zipcodeForm.touched)
-      "
     />
     <br />
     <weather-app-state-button
@@ -22,7 +23,11 @@
     ></weather-app-state-button>
 
     <ng-template #defaultTemplate>
-      <button (click)="onSubmit()" class="btn btn-primary" id="addLocationBtn">
+      <button
+        (click)="onSubmit()"
+        class="btn btn-primary"
+        [disabled]="!zipCodeForm.valid"
+      >
         Add location
       </button>
     </ng-template>
