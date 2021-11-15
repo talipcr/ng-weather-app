@@ -1,9 +1,12 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CountdownTimerDirective } from './directives/countdown-timer.directive';
-import { StateButtonComponent } from './components/state-button/state-button.component';
 import { LoaderSpinnerComponent } from './components/loader-spinner/loader-spinner.component';
+import { StateButtonComponent } from './components/state-button/state-button.component';
+import { CountdownTimerDirective } from './directives/countdown-timer.directive';
+import { CountryPipe } from './pipes/country.pipe';
+import { FormatTimestampPipe } from './pipes/format-timestamp.pipe';
+import { UnitPipe } from './pipes/unit.pipe';
 
 const MODULES = [CommonModule, FormsModule, ReactiveFormsModule];
 
@@ -15,9 +18,11 @@ const COMPONENTS = [
 
 const DIRECTIVES = [CountdownTimerDirective];
 
+const PIPES = [UnitPipe, FormatTimestampPipe, CountryPipe];
+
 @NgModule({
-  declarations: [...DIRECTIVES, ...COMPONENTS],
-  exports: [...MODULES, ...DIRECTIVES, ...COMPONENTS],
+  declarations: [...DIRECTIVES, ...COMPONENTS, ...PIPES],
+  exports: [...MODULES, ...DIRECTIVES, ...COMPONENTS, ...PIPES],
   imports: [...MODULES],
 })
 export class SharedModule {}

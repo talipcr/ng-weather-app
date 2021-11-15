@@ -1,40 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Forecast } from 'src/app/core/models/forecast';
-import { WeatherService } from 'src/app/core/services/weather.service';
 
 @Component({
   selector: 'weather-app-forecast',
   templateUrl: './forecast.component.html',
   styleUrls: ['./forecast.component.scss'],
 })
-export class ForecastComponent implements OnInit {
+export class ForecastComponent {
   zipCode: string = '';
   listForecast: Forecast[] = [];
   city: string = '';
+  country: string = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private weatherService: WeatherService
-  ) {
-    // get zipcode from url
-    this.route.params.subscribe((params) => {
-      this.zipCode = params?.zipCode;
+  constructor(private route: ActivatedRoute) {
+    // get data from forecast
+    this.route.data.subscribe((data) => {
+      this.listForecast = data.forecast;
+      this.city = this.listForecast[0].city;
+      this.country = this.listForecast[0].country;
     });
-  }
-
-  ngOnInit(): void {
-    this.weatherService
-      .getForecast(this.zipCode)
-      .subscribe((data: Forecast[]) => {
-        if (data) {
-          this.listForecast = data;
-          this.city = data[0].city;
-        }
-      });
-  }
-
-  returnDate(date: number): Date {
-    return new Date(date * 1000);
   }
 }

@@ -95,7 +95,7 @@ export class WeatherService {
 
             return {
               zipCode,
-              country: response.sys.country,
+              country: response.city.country,
               city: response.city.name,
               condition: forecast.weather[0].main,
               temperature: forecast.temp.day,

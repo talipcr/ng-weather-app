@@ -11,7 +11,7 @@ const routes: Routes = [
     },
   },
   {
-    path: ':zipCode',
+    path: ':countryCode/:zipCode',
     component: ForecastComponent,
     resolve: {
       forecast: ForecastResolver,
