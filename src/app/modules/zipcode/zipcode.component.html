@@ -27,7 +27,7 @@
       </button>
     </ng-template>
 
-    <p style="width: 100%; text-align: end">
+    <p style="width: 100%; text-align: end" *ngIf="this.weatherList.length > 0">
       <i [weatherAppCountdownTimer]="autoRefresh$">Updating weather...</i>
     </p>
   </div>
