@@ -12,6 +12,7 @@ import {
   Forecast,
   ForecastFromLocalStorage,
 } from 'src/app/core/models/forecast';
+import { CountryService } from 'src/app/core/services/country.service';
 import { LocalStorageService } from 'src/app/core/services/local-storage.service';
 import { WeatherService } from 'src/app/core/services/weather.service';
 import { StateButtonService } from 'src/app/shared/components/state-button/state-button.service';
@@ -26,12 +27,14 @@ export class ZipcodeComponent implements OnInit {
   autoRefresh$ = new Subject();
 
   zipCodeForm: FormGroup = this.fb.group({
-    country: new FormControl('FR', [Validators.required]),
+    country: new FormControl('', [Validators.required]),
     zipCode: new FormControl('', [Validators.required]),
   });
 
   weatherList: Forecast[] = [];
   zipCodeList: ForecastFromLocalStorage[] = [];
+  countries: any[] = [];
+
   autoRefreshInterval = interval(31000);
 
   constructor(
@@ -39,10 +42,14 @@ export class ZipcodeComponent implements OnInit {
     private weatherService: WeatherService,
     private toastr: ToastrService,
     private localStorage: LocalStorageService,
-    private stateButtonService: StateButtonService
+    private stateButtonService: StateButtonService,
+    private countryService: CountryService
   ) {}
 
   ngOnInit(): void {
+    // Get countries
+    this.countries = this.countryService.countries;
+
     // Init on first load
     this.initWeather();
 
@@ -91,6 +98,11 @@ export class ZipcodeComponent implements OnInit {
     }
   }
 
+  public getCountryCode(country: string): string {
+    return this.countryService.countries.find((item) => item.name === country)
+      .code;
+  }
+
   async onSubmit(): Promise<void> {
     // Set button state to working
     this.stateButtonService.setButtonStateWorking();
@@ -102,9 +114,12 @@ export class ZipcodeComponent implements OnInit {
 
     if (this.zipCodeForm.value && !isAlreadyInList) {
       // Get crountry code
-      const country = this.zipCodeForm.controls['country'].value
+      const country = this.getCountryCode(
+        this.zipCodeForm.controls['country'].value
+      )
         .toString()
         .toLowerCase();
+
       // Get zip code
       const zipCode = this.zipCodeForm.controls['zipCode'].value
         .toString()
@@ -114,8 +129,8 @@ export class ZipcodeComponent implements OnInit {
       this.weatherService
         .getWeatherByZipCode(zipCode, country)
         .pipe(
-          finalize(() => {
-            this.zipCodeForm.reset();
+          finalize(async () => {
+            await this.zipCodeForm.reset();
           })
         )
         .subscribe((data: Forecast) => {

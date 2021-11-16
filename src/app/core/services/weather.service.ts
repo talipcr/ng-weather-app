@@ -42,7 +42,7 @@ export class WeatherService {
 
   public getWeatherByZipCode(
     zipCode: string,
-    countryCode: string = 'fr'
+    countryCode: string
   ): Observable<any> {
     return this.httpClient
       .get(
@@ -77,10 +77,7 @@ export class WeatherService {
       );
   }
 
-  public getForecast(
-    zipCode: string,
-    countryCode: string = 'fr'
-  ): Observable<any> {
+  public getForecast(zipCode: string, countryCode: string): Observable<any> {
     return this.httpClient
       .get(
         `${this.apiUrl}forecast/daily?zip=${zipCode},${countryCode}&cnt=5&appid=${this.apiKey}&units=metric`

@@ -1,0 +1,24 @@
+<div [formGroup]="form" class="autocomplete-container">
+  <input
+    class="form-control"
+    [formControlName]="controllerName"
+    [type]="type"
+    [placeholder]="placeholder"
+    (focus)="focused = true"
+    (blur)="focused = false"
+  />
+  <div
+    *ngIf="optionsDisplayed.length > 0 && focused"
+    class="autocomplete-options"
+  >
+    <span
+      *ngFor="let option of optionsDisplayed"
+      class="option"
+      (mousedown)="onOptionSelected(option.name)"
+      weatherAppAutocompleteMatch="{{ option.name }}"
+      [searchValue]="form.controls[controllerName].value"
+    >
+      {{ option.name }}
+    </span>
+  </div>
+</div>

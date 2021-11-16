@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AutocompleteComponent } from './components/autocomplete/autocomplete.component';
 import { LoaderSpinnerComponent } from './components/loader-spinner/loader-spinner.component';
 import { StateButtonComponent } from './components/state-button/state-button.component';
+import { AutocompleteMatchDirective } from './directives/autocomplete-match.directive';
 import { CountdownTimerDirective } from './directives/countdown-timer.directive';
 import { CountryPipe } from './pipes/country.pipe';
 import { FormatTimestampPipe } from './pipes/format-timestamp.pipe';
@@ -14,9 +16,10 @@ const COMPONENTS = [
   CountdownTimerDirective,
   StateButtonComponent,
   LoaderSpinnerComponent,
+  AutocompleteComponent,
 ];
 
-const DIRECTIVES = [CountdownTimerDirective];
+const DIRECTIVES = [CountdownTimerDirective, AutocompleteMatchDirective];
 
 const PIPES = [UnitPipe, FormatTimestampPipe, CountryPipe];
 

@@ -1,13 +1,13 @@
 <div class="container-fluid">
   <div class="well" [formGroup]="zipCodeForm">
     <h2>Enter a zip code:</h2>
-    <input
-      formControlName="country"
-      (keydown.enter)="zipCode.focus()"
-      class="form-control"
-      type="text"
-      placeholder="Enter a country"
-    />
+    <weather-app-autocomplete
+      [form]="zipCodeForm"
+      [controllerName]="'country'"
+      [type]="'text'"
+      [placeholder]="'Enter a country'"
+      [options]="countries"
+    ></weather-app-autocomplete>
     <br />
     <input
       #zipCode
@@ -31,7 +31,6 @@
         Add location
       </button>
     </ng-template>
-
     <p style="width: 100%; text-align: end" *ngIf="this.weatherList.length > 0">
       <i [weatherAppCountdownTimer]="autoRefresh$">Updating weather...</i>
     </p>
