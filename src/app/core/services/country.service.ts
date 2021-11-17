@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
+import { Country } from '../models/country';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CountryService {
-  public countries: any[] = [
+  public countries: Country[] = [
     { name: 'Afghanistan', code: 'AF' },
     { name: 'Aland Islands', code: 'AX' },
     { name: 'Albania', code: 'AL' },

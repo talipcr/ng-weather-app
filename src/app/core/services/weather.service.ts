@@ -5,6 +5,11 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Forecast, ForecastFromLocalStorage } from '../models/forecast';
+import {
+  WeatherFiveDaysResponse,
+  WeatherList,
+  WeatherResponse,
+} from '../models/weather';
 
 @Injectable({
   providedIn: 'root',
@@ -43,13 +48,13 @@ export class WeatherService {
   public getWeatherByZipCode(
     zipCode: string,
     countryCode: string
-  ): Observable<any> {
+  ): Observable<Forecast | unknown> {
     return this.httpClient
-      .get(
+      .get<WeatherResponse>(
         `${this.apiUrl}weather?zip=${zipCode},${countryCode}&appid=${this.apiKey}&units=metric`
       )
       .pipe(
-        map((response: any) => {
+        map((response: WeatherResponse) => {
           const icon = this.icons.filter((icon) => {
             return icon.includes(response.weather[0].main.toLowerCase());
           });
@@ -72,20 +77,24 @@ export class WeatherService {
             'An error occurred while retrieving the weather data',
             'Error'
           );
+
           return error;
         })
       );
   }
 
-  public getForecast(zipCode: string, countryCode: string): Observable<any> {
+  public getForecast(
+    zipCode: string,
+    countryCode: string
+  ): Observable<Forecast> {
     return this.httpClient
-      .get(
+      .get<WeatherFiveDaysResponse>(
         `${this.apiUrl}forecast/daily?zip=${zipCode},${countryCode}&cnt=5&appid=${this.apiKey}&units=metric`
       )
       .pipe(
-        map((response: any) => {
+        map((response: WeatherFiveDaysResponse) => {
           const forecastTab: Forecast[] = [];
-          const forecast = response?.list.map((forecast: any) => {
+          const forecast = response?.list.map((forecast: WeatherList) => {
             const icon = this.icons.filter((icon) => {
               return icon.includes(forecast.weather[0].main.toLowerCase());
             });
@@ -113,7 +122,8 @@ export class WeatherService {
             'An error occurred while retrieving the weather data',
             'Error'
           );
-          return error;
+
+          return of(error);
         })
       );
   }

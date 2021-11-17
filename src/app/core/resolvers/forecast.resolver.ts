@@ -17,7 +17,7 @@ export class ForecastResolver implements Resolve<boolean> {
       return this.weatherService
         .getForecast(route.params.zipCode, route.params.countryCode)
         .pipe(
-          map((forecast: Forecast[]) => {
+          map((forecast: Forecast) => {
             if (forecast) {
               return forecast;
             } else {
