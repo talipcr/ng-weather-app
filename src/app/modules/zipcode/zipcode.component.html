@@ -1,20 +1,21 @@
 <div class="container-fluid">
-  <div class="well">
-    <h2>Enter a FR zipcode:</h2>
-
+  <div class="well" [formGroup]="zipCodeForm">
+    <h2>Enter a zip code:</h2>
+    <weather-app-autocomplete
+      [form]="zipCodeForm"
+      [controllerName]="'country'"
+      [type]="'text'"
+      [placeholder]="'Enter a country'"
+      [options]="countries"
+    ></weather-app-autocomplete>
+    <br />
     <input
-      [formControl]="zipcodeForm"
-      (keydown.enter)="onSubmit()"
+      #zipCode
+      formControlName="zipCode"
+      (keydown.enter)="zipCodeForm.valid && onSubmit()"
       class="form-control"
-      placeholder="Example : 75000"
+      placeholder="Enter a zip code"
       type="number"
-      id="addLocation"
-      [class.valid]="
-        zipcodeForm.valid && (zipcodeForm.dirty || zipcodeForm.touched)
-      "
-      [class.invalid]="
-        zipcodeForm.invalid && (zipcodeForm.dirty || zipcodeForm.touched)
-      "
     />
     <br />
     <weather-app-state-button
@@ -22,12 +23,15 @@
     ></weather-app-state-button>
 
     <ng-template #defaultTemplate>
-      <button (click)="onSubmit()" class="btn btn-primary" id="addLocationBtn">
+      <button
+        (click)="onSubmit()"
+        class="btn btn-primary"
+        [disabled]="!zipCodeForm.valid"
+      >
         Add location
       </button>
     </ng-template>
-
-    <p style="width: 100%; text-align: end">
+    <p style="width: 100%; text-align: end" *ngIf="this.weatherList.length > 0">
       <i [weatherAppCountdownTimer]="autoRefresh$">Updating weather...</i>
     </p>
   </div>
@@ -45,21 +49,29 @@
 
         <ng-template #elseDisplayWeather>
           <div>
-            <h3>{{ item.city }}&nbsp;({{ item.zipCode }})</h3>
+            <h3>
+              {{ item.city }},&nbsp;{{ item.country | country }}&nbsp;({{
+                item.zipCode
+              }})
+            </h3>
             <h4>Current conditions: {{ item.condition }}</h4>
             <h4>Temperatures today:</h4>
             <p>
-              Current&nbsp;{{
-                item.temperature | number: "1.0-0"
-              }}&deg;&nbsp;-&nbsp;Max&nbsp;{{
-                item.maxTemp | number: "1.0-0"
-              }}&deg;&nbsp;-&nbsp;Min&nbsp;{{
-                item.minTemp | number: "1.0-0"
-              }}&deg;
+              Current
+              {{ item.temperature | number: "1.0-0" | unit: "METRIC" }} - Max
+              {{ item.maxTemp | number: "1.0-0" | unit: "METRIC" }} - Min
+              {{ item.minTemp | number: "1.0-0" | unit: "METRIC" }}
             </p>
             <p>
-              <a [routerLink]="['forecast', item.zipCode]"
-                >Show 5-day forecast for {{ item.city }}</a
+              <a
+                [routerLink]="[
+                  'forecast',
+                  item.country | lowercase,
+                  item.zipCode
+                ]"
+                >Show 5-day forecast for {{ item.city }},&nbsp;{{
+                  item.country | country
+                }}</a
               >
             </p>
           </div>

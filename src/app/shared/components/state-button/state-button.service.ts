@@ -18,7 +18,10 @@ export class StateButtonService {
   }
 
   public setButtonStateDone(): void {
-    this.buttonState$.next(ButtonStateModel.DONE);
+    timer(500).subscribe(() => {
+      this.buttonState$.next(ButtonStateModel.DONE);
+    });
+
     timer(2000).subscribe(() => this.setButtonStateDefault());
   }
 }

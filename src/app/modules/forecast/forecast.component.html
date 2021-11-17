@@ -1,16 +1,17 @@
 <div class="container-fluid">
   <div class="panel panel-default">
     <div class="panel-heading">
-      <h3 class="panel-title">5-day forecast for {{ city }}</h3>
+      <h3 class="panel-title">
+        5-day forecast for {{ city }},&nbsp;{{ country | country }}
+      </h3>
     </div>
 
     <ul class="list-group" *ngIf="listForecast.length > 0; else elseNoForecast">
       <li class="list-group-item" *ngFor="let item of listForecast">
-        {{ returnDate(item.timestamp) | date: "EEEE, MMM d" }}:&nbsp;{{
-          item.condition
-        }}&nbsp;-&nbsp;Min:&nbsp;{{
-          item.minTemp | number: "1.0-0"
-        }}&deg;&nbsp;-&nbsp;Max:&nbsp;{{ item.maxTemp | number: "1.0-0" }}&deg;
+        {{ item.timestamp | formatTimestamp | date: "EEEE, MMM d" }}:
+        {{ item.condition }} - Min:
+        {{ item.minTemp | number: "1.0-0" | unit: "METRIC" }} - Max:
+        {{ item.maxTemp | number: "1.0-0" | unit: "METRIC" }}
 
         <img
           class="icon"
@@ -33,6 +34,6 @@
     tabindex="0"
     id="mainPageBtn"
   >
-    &lt;&nbsp;Back to main page
+    &lt; Back to main page
   </button>
 </div>
